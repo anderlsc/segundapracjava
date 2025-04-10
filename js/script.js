@@ -1,201 +1,212 @@
-// Referencias a los elementos del juego
+// Variables y configuración inicial
 const player1 = document.getElementById("player1");
 const player2 = document.getElementById("player2");
 const ball = document.getElementById("ball");
-const goal1 = document.getElementById("goal1");
-const goal2 = document.getElementById("goal2");
 const scoreDisplay = document.getElementById("score");
+const fieldWidth = window.innerWidth;
+const fieldHeight = window.innerHeight;
+const playerSize = 50;
+const ballSize = 30;
+const moveSpeed = 5;
+const ballSpeed = 2;
+let timer; // Cronómetro
+let timeRemaining = 90; // Duración inicial del partido en segundos
+const extraTime = 30; // Tiempo extra en caso de empate
+let gameEnded = false; // Indica si el juego ha terminado
 
-// Variables para posiciones y marcador
 const initialPositions = {
-    player1: { top: 125, left: 25 },
-    player2: { top: 125, left: 545 },
-    ball: { top: 140, left: 290 }
+    player1: { top: fieldHeight * 0.4, left: fieldWidth * 0.1 },
+    player2: { top: fieldHeight * 0.4, left: fieldWidth * 0.8 },
+    ball: { top: fieldHeight * 0.5, left: fieldWidth * 0.5 }
 };
+
 let player1Position = { ...initialPositions.player1 };
 let player2Position = { ...initialPositions.player2 };
 let ballPosition = { ...initialPositions.ball };
-let score = { player1: 0, player2: 0 };
+let ballVelocity = { x: 0, y: 0 };
+let keysPressed = {}; // Almacena las teclas presionadas
+let scores = { player1: 0, player2: 0 };
 
-// Dimensiones del campo y elementos
-const fieldWidth = 600;
-const fieldHeight = 300;
-const playerSize = 30;
-const ballSize = 20;
-
-// Propiedades del movimiento del balón
-let ballSpeedX = 0; // Velocidad en el eje X
-let ballSpeedY = 0; // Velocidad en el eje Y
-
-// Fuerza del empuje y disparo
-const pushForce = 0.8; // Empuje reducido
-const shotForce = 8; // Fuerza del disparo
-
-// Función para mover jugadores
-document.addEventListener("keydown", function (event) {
-    // Jugador 1 controla con WASD
-    if (event.key === "w") player1Position.top -= 10;
-    if (event.key === "s") player1Position.top += 10;
-    if (event.key === "a") player1Position.left -= 10;
-    if (event.key === "d") player1Position.left += 10;
-
-    // Jugador 2 controla con flechas
-    if (event.key === "ArrowUp") player2Position.top -= 10;
-    if (event.key === "ArrowDown") player2Position.top += 10;
-    if (event.key === "ArrowLeft") player2Position.left -= 10;
-    if (event.key === "ArrowRight") player2Position.left += 10;
-
-    // Limitar movimientos dentro del campo
-    player1Position.top = Math.max(0, Math.min(fieldHeight - playerSize, player1Position.top));
-    player1Position.left = Math.max(0, Math.min(fieldWidth - playerSize, player1Position.left));
-    player2Position.top = Math.max(0, Math.min(fieldHeight - playerSize, player2Position.top));
-    player2Position.left = Math.max(0, Math.min(fieldWidth - playerSize, player2Position.left));
-
-    // Actualizar posiciones de los jugadores
-    player1.style.top = player1Position.top + "px";
-    player1.style.left = player1Position.left + "px";
-    player2.style.top = player2Position.top + "px";
-    player2.style.left = player2Position.left + "px";
-
-    // Interacción automática: Empuje del balón
-    pushBall();
+// Configuración de eventos de teclado
+document.addEventListener("keydown", (event) => {
+    keysPressed[event.key] = true;
 });
 
-// Función para empujar el balón
-function pushBall() {
-    const player1Rect = player1.getBoundingClientRect();
-    const player2Rect = player2.getBoundingClientRect();
-    const ballRect = ball.getBoundingClientRect();
+document.addEventListener("keyup", (event) => {
+    keysPressed[event.key] = false;
+});
 
-    // Jugador 1 empuja el balón
-    if (
-        ballRect.left < player1Rect.right &&
-        ballRect.right > player1Rect.left &&
-        ballRect.top < player1Rect.bottom &&
-        ballRect.bottom > player1Rect.top
-    ) {
-        ballSpeedX = pushForce;
-        ballSpeedY = (Math.random() - 0.5) * pushForce;
+// Movimiento continuo
+function movePlayers() {
+    if (gameEnded) return;
+
+    // Jugador 1 (WASD)
+    if (keysPressed["w"]) player1Position.top -= moveSpeed;
+    if (keysPressed["s"]) player1Position.top += moveSpeed;
+    if (keysPressed["a"]) player1Position.left -= moveSpeed;
+    if (keysPressed["d"]) player1Position.left += moveSpeed;
+
+    // Jugador 2 (Flechas)
+    if (keysPressed["ArrowUp"]) player2Position.top -= moveSpeed;
+    if (keysPressed["ArrowDown"]) player2Position.top += moveSpeed;
+    if (keysPressed["ArrowLeft"]) player2Position.left -= moveSpeed;
+    if (keysPressed["ArrowRight"]) player2Position.left += moveSpeed;
+
+    // Limitar movimiento dentro del campo
+    limitPlayerPosition(player1Position, player1);
+    limitPlayerPosition(player2Position, player2);
+
+    // Verificar colisiones con el balón
+    checkCollision(player1Position, ballPosition, "player1");
+    checkCollision(player2Position, ballPosition, "player2");
+
+    // Mover el balón
+    moveBall();
+
+    // Repetir el ciclo
+    requestAnimationFrame(movePlayers);
+}
+// Limitar posición de los jugadores al campo
+function limitPlayerPosition(position, player) {
+    // Restricciones generales en el campo
+    position.top = Math.max(0, Math.min(fieldHeight - playerSize, position.top));
+    position.left = Math.max(0, Math.min(fieldWidth - playerSize, position.left));
+    
+    // Restricciones para evitar que entren en las porterías
+    const goalHeight = 150; // Altura de las porterías
+    const goalWidth = 80; // Ancho de las porterías
+
+    // Restricción para ambas porterías (jugador 1 y jugador 2)
+    if (position.left <= goalWidth) {
+        // No pueden entrar en la portería izquierda
+        position.left = goalWidth;
+    }
+    if (position.left >= fieldWidth - goalWidth - playerSize) {
+        // No pueden entrar en la portería derecha
+        position.left = fieldWidth - goalWidth - playerSize;
     }
 
-    // Jugador 2 empuja el balón
-    if (
-        ballRect.left < player2Rect.right &&
-        ballRect.right > player2Rect.left &&
-        ballRect.top < player2Rect.bottom &&
-        ballRect.bottom > player2Rect.top
-    ) {
-        ballSpeedX = -pushForce;
-        ballSpeedY = (Math.random() - 0.5) * pushForce;
+    player.style.top = position.top + "px";
+    player.style.left = position.left + "px";
+}
+
+
+// Verificar colisión entre jugador y balón
+function checkCollision(playerPos, ballPos, player) {
+    const distanceX = playerPos.left + playerSize / 2 - (ballPos.left + ballSize / 2);
+    const distanceY = playerPos.top + playerSize / 2 - (ballPos.top + ballSize / 2);
+    const distance = Math.sqrt(distanceX ** 2 + distanceY ** 2);
+
+    if (distance < playerSize / 2 + ballSize / 2) {
+        // Calcular dirección del rebote
+        ballVelocity.x = (distanceX / distance) * ballSpeed;
+        ballVelocity.y = (distanceY / distance) * ballSpeed;
     }
 }
 
-// Función para disparar el balón
-document.addEventListener("keydown", function (event) {
-    const player1Rect = player1.getBoundingClientRect();
-    const player2Rect = player2.getBoundingClientRect();
-    const ballRect = ball.getBoundingClientRect();
+// Mover el balón
+function moveBall() {
+    ballPosition.left += ballVelocity.x;
+    ballPosition.top += ballVelocity.y;
 
-    if (event.code === "Space" || event.code === "Enter") {
-        // Jugador 1 dispara el balón
-        if (
-            ballRect.left < player1Rect.right &&
-            ballRect.right > player1Rect.left &&
-            ballRect.top < player1Rect.bottom &&
-            ballRect.bottom > player1Rect.top
-        ) {
-            ballSpeedX = shotForce;
-            ballSpeedY = (Math.random() - 0.5) * shotForce;
-        }
-
-        // Jugador 2 dispara el balón
-        if (
-            ballRect.left < player2Rect.right &&
-            ballRect.right > player2Rect.left &&
-            ballRect.top < player2Rect.bottom &&
-            ballRect.bottom > player2Rect.top
-        ) {
-            ballSpeedX = -shotForce;
-            ballSpeedY = (Math.random() - 0.5) * shotForce;
-        }
-    }
-});
-
-// Actualizar posición del balón
-function updateBallPosition() {
-    ballPosition.left += ballSpeedX;
-    ballPosition.top += ballSpeedY;
-
-    // Rebote en los bordes del campo
+    // Rebotes en los bordes
     if (ballPosition.left <= 0 || ballPosition.left >= fieldWidth - ballSize) {
-        ballSpeedX *= -0.5; // Rebote reducido en X
+        ballVelocity.x *= -1;
     }
     if (ballPosition.top <= 0 || ballPosition.top >= fieldHeight - ballSize) {
-        ballSpeedY *= -0.5; // Rebote reducido en Y
+        ballVelocity.y *= -1;
     }
 
-    // Reducir la velocidad gradualmente (simulación de fricción)
-    ballSpeedX *= 0.95;
-    ballSpeedY *= 0.95;
+    // Reducir velocidad del balón (fricción)
+    ballVelocity.x *= 0.99;
+    ballVelocity.y *= 0.99;
 
-    // Detener el balón si la velocidad es muy baja
-    if (Math.abs(ballSpeedX) < 0.1) ballSpeedX = 0;
-    if (Math.abs(ballSpeedY) < 0.1) ballSpeedY = 0;
-
+    // Actualizar posición del balón
     ball.style.left = ballPosition.left + "px";
     ball.style.top = ballPosition.top + "px";
 
+    // Verificar goles
     checkGoal();
-    requestAnimationFrame(updateBallPosition);
 }
 
-// Verificar goles
+// Verificar si hay goles
 function checkGoal() {
-    const ballRect = ball.getBoundingClientRect();
-    const goal1Rect = goal1.getBoundingClientRect();
-    const goal2Rect = goal2.getBoundingClientRect();
-
-    // Gol en portería 1
-    if (
-        ballRect.left <= goal1Rect.right &&
-        ballRect.top >= goal1Rect.top &&
-        ballRect.bottom <= goal1Rect.bottom
-    ) {
-        score.player2++;
+    if (ballPosition.left <= 10) {
+        // Gol para el Jugador 2
+        scores.player2++;
+        updateScore();
         resetPositions();
-    }
-
-    // Gol en portería 2
-    if (
-        ballRect.left + ballSize >= goal2Rect.left &&
-        ballRect.top >= goal2Rect.top &&
-        ballRect.bottom <= goal2Rect.bottom
-    ) {
-        score.player1++;
+        checkWinCondition();
+    } else if (ballPosition.left + ballSize >= fieldWidth - 10) {
+        // Gol para el Jugador 1
+        scores.player1++;
+        updateScore();
         resetPositions();
+        checkWinCondition();
     }
-
-    // Actualizar marcador
-    scoreDisplay.textContent = `Jugador 1: ${score.player1} | Jugador 2: ${score.player2}`;
 }
 
-// Reiniciar posiciones tras un gol
+// Condiciones para ganar
+function checkWinCondition() {
+    if (scores.player1 >= 3) {
+        endGame("Jugador 1 gana por anotar 3 goles.");
+    } else if (scores.player2 >= 3) {
+        endGame("Jugador 2 gana por anotar 3 goles.");
+    }
+}
+
+// Actualizar marcador
+function updateScore() {
+    scoreDisplay.textContent = `Tiempo: ${timeRemaining}s | Jugador 1: ${scores.player1} | Jugador 2: ${scores.player2}`;
+}
+
+// Cronómetro del partido
+function startTimer() {
+    timer = setInterval(() => {
+        timeRemaining--;
+
+        if (timeRemaining <= 0 && !gameEnded) {
+            clearInterval(timer);
+            checkFinalScore();
+        }
+
+        updateScore();
+    }, 1000);
+}
+
+// Verificar el puntaje final
+function checkFinalScore() {
+    if (scores.player1 > scores.player2) {
+        endGame("Jugador 1 gana por puntaje al finalizar el tiempo.");
+    } else if (scores.player2 > scores.player1) {
+        endGame("Jugador 2 gana por puntaje al finalizar el tiempo.");
+    } else {
+        timeRemaining = extraTime; // Tiempo extra
+        startTimer();
+    }
+}
+
+// Terminar el juego
+function endGame(message) {
+    gameEnded = true;
+    alert(message);
+    resetPositions();
+}
+
+// Reiniciar posiciones y marcador
 function resetPositions() {
     player1Position = { ...initialPositions.player1 };
     player2Position = { ...initialPositions.player2 };
     ballPosition = { ...initialPositions.ball };
+    ballVelocity = { x: 0, y: 0 };
 
-    player1.style.top = player1Position.top + "px";
-    player1.style.left = player1Position.left + "px";
-    player2.style.top = player2Position.top + "px";
-    player2.style.left = player2Position.left + "px";
-    ball.style.top = ballPosition.top + "px";
+    limitPlayerPosition(player1Position, player1);
+    limitPlayerPosition(player2Position, player2);
     ball.style.left = ballPosition.left + "px";
-
-    ballSpeedX = 0; // Detener el balón
-    ballSpeedY = 0;
+    ball.style.top = ballPosition.top + "px";
 }
 
-// Iniciar el juego
-updateBallPosition();
-
+// Inicializar el juego
+resetPositions();
+startTimer();
+movePlayers();

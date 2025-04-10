@@ -5,93 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Juego de Fútbol - Estadio Grande</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            height: 100vh;
-            background-color: green;
-            margin: 0;
-        }
-        #game {
-            position: relative;
-            width: 600px;
-            height: 300px;
-            background-color: white;
-            border: 5px solid black;
-            margin-bottom: 20px;
-            border-radius: 10px;
-        }
-        .player {
-            position: absolute;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-        }
-        #player1 {
-            background-color: blue;
-            top: 125px;
-            left: 25px;
-        }
-        #player2 {
-            background-color: red;
-            top: 125px;
-            left: 545px;
-        }
-        #ball {
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            background-color: black;
-            border-radius: 50%;
-            top: 140px;
-            left: 290px;
-        }
-        .goal {
-            position: absolute;
-            width: 50px;
-            height: 100px;
-            background-color: yellow;
-        }
-        #goal1 {
-            top: 100px;
-            left: 0;
-        }
-        #goal2 {
-            top: 100px;
-            right: 0;
-        }
-        #score {
-            position: absolute;
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 24px;
-            font-family: 'Arial', sans-serif;
-            font-weight: bold;
-            color: white;
-            background-color: rgba(0, 0, 0, 0.7);
-            padding: 10px 20px;
-            border: 2px solid gold;
-            border-radius: 15px;
-            box-shadow: 0 0 10px rgba(255, 255, 0, 0.8);
-            text-align: center;
-            width: 300px;
-        }
-    </style>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <div id="score" class="text-center">Jugador 1: 0 | Jugador 2: 0</div>
+    <div id="score" class="text-center">
+        Tiempo: 90s | Jugador 1: 0 | Jugador 2: 0
+    </div>
     <div id="game" class="rounded">
+        <div class="line" id="line-top"></div>
+        <div class="line" id="line-bottom"></div>
         <div id="player1" class="player"></div>
         <div id="player2" class="player"></div>
         <div id="ball"></div>
         <div id="goal1" class="goal"></div>
         <div id="goal2" class="goal"></div>
+        <div class="circle"></div>
     </div>
     <script src="js/script.js"></script>
 </body>
 </html>
-

@@ -1,0 +1,128 @@
+/* Estilo general */
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    height: 100vh;
+    margin: 0;
+    background-color: green;
+}
+
+#game {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw; /* Ancho completo */
+    height: 100vh; /* Alto completo */
+    background: url('cesped-textura.jpg') center/cover no-repeat; /* Fondo de césped */
+    border: 10px solid white; /* Margen blanco */
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5); /* Profundidad */
+}
+
+#game::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 2px;
+    height: 100%;
+    background-color: white;
+    transform: translateX(-50%);
+}
+
+#game .circle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 150px;
+    height: 150px;
+    border: 2px solid white;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.line {
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    background-color: white;
+}
+
+#line-top {
+    top: 20px;
+}
+
+#line-bottom {
+    bottom: 20px;
+}
+
+.player {
+    position: absolute;
+    width: 50px; /* Tamaño del jugador */
+    height: 50px;
+    border-radius: 50%;
+    transition: top 0.1s linear, left 0.1s linear; /* Movimiento fluido */
+}
+
+#player1 {
+    background-color: blue;
+    top: 40%; /* Posición inicial frente a la portería */
+    left: 5%;
+}
+
+#player2 {
+    background-color: red;
+    top: 40%; /* Posición inicial frente a la portería */
+    left: 90%;
+}
+
+#ball {
+    position: absolute;
+    width: 30px; /* Tamaño del balón */
+    height: 30px;
+    background-color: black;
+    border-radius: 50%;
+    top: 50%; /* Centro del campo */
+    left: 50%;
+    transition: top 0.1s linear, left 0.1s linear; /* Movimiento suave */
+}
+
+.goal {
+    position: absolute;
+    width: 80px;
+    height: 150px;
+    background-color: transparent;
+    border: 3px solid white;
+    box-sizing: border-box;
+}
+
+#goal1 {
+    top: 50%;
+    left: -10px;
+    transform: translateY(-50%);
+}
+
+#goal2 {
+    top: 50%;
+    right: -10px;
+    transform: translateY(-50%);
+}
+
+#score {
+    position: fixed; /* Fijo en la parte superior */
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 24px;
+    font-family: 'Arial Black', sans-serif;
+    font-weight: bold;
+    color: gold;
+    background: linear-gradient(to right, #000000, #434343);
+    padding: 15px 30px;
+    border: 3px solid #FFD700; /* Dorado metálico */
+    border-radius: 25px;
+    box-shadow: 0 0 20px rgba(255, 255, 0, 0.9);
+    text-align: center;
+    z-index: 1000;
+}
