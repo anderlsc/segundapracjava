@@ -1,12 +1,8 @@
-// Referencia a los botones
-const cpuModeButton = document.getElementById("cpuMode");
-const twoPlayersModeButton = document.getElementById("twoPlayersMode");
+// Referencia al botón "Iniciar Juego"
+const startGameButton = document.getElementById("startGame");
 
-// Función para manejar clics
-cpuModeButton.addEventListener("click", () => {
-    window.location.href = "index.html"; // Redirigir al juego con lógica de CPU
-});
-
-twoPlayersModeButton.addEventListener("click", () => {
-    window.location.href = "index.html"; // Redirigir al juego en modo de 2 jugadores
+// Al hacer clic, redirige a "juego.html", donde se ejecuta el juego
+startGameButton.addEventListener("click", () => {
+  // Aquí podrías reproducir un efecto sonoro si lo deseas
+  window.location.href = "juego.html";
 });

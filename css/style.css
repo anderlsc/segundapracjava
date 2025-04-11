@@ -1,128 +1,210 @@
-/* Estilo general */
+/* ======================================================
+   VARIABLES GLOBALES
+====================================================== */
+:root {
+  /* Colores y fondos */
+  --primary-bg: green;
+  --field-border: white;
+  --field-shadow: rgba(0, 0, 0, 0.5);
+  --line-color: white;
+  --player1-color: blue;
+  --player2-color: red;
+  --ball-shadow: rgba(0, 0, 0, 0.5);
+  --score-font-color: gold;
+  --score-bg-gradient: linear-gradient(to right, #000000, #434343);
+  --score-border: #FFD700;
+
+  /* Tamaños */
+  --player-size: 50px;
+  --ball-size: 30px;
+  --goal-width: 80px;
+  --goal-height: 150px;
+  --circle-diameter: 150px;
+}
+
+/* ======================================================
+   ESTILO GENERAL
+====================================================== */
 body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    height: 100vh;
-    margin: 0;
-    background-color: green;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  background-color: var(--primary-bg);
 }
 
+/* ======================================================
+   ÁREA DE JUEGO
+====================================================== */
 #game {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100vw; /* Ancho completo */
-    height: 100vh; /* Alto completo */
-    background: url('cesped-textura.jpg') center/cover no-repeat; /* Fondo de césped */
-    border: 10px solid white; /* Margen blanco */
-    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5); /* Profundidad */
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw; /* Ancho completo */
+  height: 100vh; /* Alto completo */
+  background-color: green;  /* Fondo sólido */
+  border: 10px solid var(--field-border);
+  box-shadow: inset 0 0 10px var(--field-shadow);
 }
 
+/* Línea central vertical */
 #game::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 50%;
-    width: 2px;
-    height: 100%;
-    background-color: white;
-    transform: translateX(-50%);
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 2px;
+  height: 100%;
+  background-color: var(--line-color);
+  transform: translateX(-50%);
 }
 
+/* Círculo central */
 #game .circle {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 150px;
-    height: 150px;
-    border: 2px solid white;
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--circle-diameter);
+  height: var(--circle-diameter);
+  border: 2px solid var(--line-color);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
 }
 
+/* Líneas horizontales (opcional) */
 .line {
-    position: absolute;
-    width: 100%;
-    height: 2px;
-    background-color: white;
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  background-color: var(--line-color);
 }
 
 #line-top {
-    top: 20px;
+  top: 20px;
 }
 
 #line-bottom {
-    bottom: 20px;
+  bottom: 20px;
 }
 
+/* ======================================================
+   JUGADORES
+====================================================== */
 .player {
-    position: absolute;
-    width: 50px; /* Tamaño del jugador */
-    height: 50px;
-    border-radius: 50%;
-    transition: top 0.1s linear, left 0.1s linear; /* Movimiento fluido */
+  position: absolute;
+  width: var(--player-size);
+  height: var(--player-size);
+  border-radius: 50%;
+  transition: top 0.1s linear, left 0.1s linear;
 }
 
 #player1 {
-    background-color: blue;
-    top: 40%; /* Posición inicial frente a la portería */
-    left: 5%;
+  background-color: var(--player1-color);
 }
 
 #player2 {
-    background-color: red;
-    top: 40%; /* Posición inicial frente a la portería */
-    left: 90%;
+  background-color: var(--player2-color);
 }
 
+/* ======================================================
+   BALÓN
+====================================================== */
 #ball {
-    position: absolute;
-    width: 30px; /* Tamaño del balón */
-    height: 30px;
-    background-color: black;
-    border-radius: 50%;
-    top: 50%; /* Centro del campo */
-    left: 50%;
-    transition: top 0.1s linear, left 0.1s linear; /* Movimiento suave */
+  position: absolute;
+  width: var(--ball-size);
+  height: var(--ball-size);
+  border-radius: 50%;
+  background-image: url('../images/balon.png');
+  background-size: cover;
+  background-position: center;
+  background-color: transparent;
+  box-shadow: 0 0 5px var(--ball-shadow);
+  transition: top 0.1s linear, left 0.1s linear;
 }
 
+#ball.hit {
+  animation: rebote 0.3s ease;
+}
+
+@keyframes rebote {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+/* ======================================================
+   PORTERÍAS
+====================================================== */
 .goal {
-    position: absolute;
-    width: 80px;
-    height: 150px;
-    background-color: transparent;
-    border: 3px solid white;
-    box-sizing: border-box;
+  position: absolute;
+  width: var(--goal-width);
+  height: var(--goal-height);
+  background-color: transparent;
+  border: 3px solid var(--line-color);
+  box-sizing: border-box;
 }
 
 #goal1 {
-    top: 50%;
-    left: -10px;
-    transform: translateY(-50%);
+  top: 50%;
+  left: -10px;
+  transform: translateY(-50%);
 }
 
 #goal2 {
-    top: 50%;
-    right: -10px;
-    transform: translateY(-50%);
+  top: 50%;
+  right: -10px;
+  transform: translateY(-50%);
 }
 
+/* ======================================================
+   MARCADOR
+====================================================== */
 #score {
-    position: fixed; /* Fijo en la parte superior */
-    top: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 24px;
-    font-family: 'Arial Black', sans-serif;
-    font-weight: bold;
-    color: gold;
-    background: linear-gradient(to right, #000000, #434343);
-    padding: 15px 30px;
-    border: 3px solid #FFD700; /* Dorado metálico */
-    border-radius: 25px;
-    box-shadow: 0 0 20px rgba(255, 255, 0, 0.9);
-    text-align: center;
-    z-index: 1000;
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 24px;
+  font-family: "Arial Black", sans-serif;
+  font-weight: bold;
+  color: var(--score-font-color);
+  background: var(--score-bg-gradient);
+  padding: 15px 30px;
+  border: 3px solid var(--score-border);
+  border-radius: 25px;
+  box-shadow: 0 0 20px rgba(255,255,0,0.9);
+  text-align: center;
+  z-index: 1000;
 }
+
+/* ======================================================
+   MEDIA QUERIES PARA PANTALLAS PEQUEÑAS
+====================================================== */
+@media (max-width: 768px) {
+  #game {
+    border-width: 5px;
+  }
+
+  .player {
+    width: 40px;
+    height: 40px;
+  }
+
+  #ball {
+    width: 25px;
+    height: 25px;
+  }
+
+  #score {
+    font-size: 18px;
+    padding: 10px 20px;
+  }
+
+  #game .circle {
+    width: 120px;
+    height: 120px;
+  }
+}
+
